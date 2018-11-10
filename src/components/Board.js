@@ -4,7 +4,9 @@ import styled from 'styled-components';
 const StyledBoard = styled.div`
 	display: flex;
 	justify-content: center;
-	align-items; center;
+	align-items: center;
+	flex-wrap: wrap;
+	flex-direction: column;
 
 	.screen {
 		background-color: #aaa;
@@ -78,6 +80,7 @@ const initialState = {
 	scrollTopPipeInterval: null,
 	pipePosX: initialPipePosX,
 	milliseconds: 25,
+	points: 0,
 	startDisplay: 'flex',
 	gameOverDisplay: 'none',
 };
@@ -128,9 +131,15 @@ export default class Board extends Component {
 			right: bottomPipeRight,
 		} = this.bottomPipe.getBoundingClientRect();
 
+		if (topPipeLeft > birdRight || topPipeRight < birdLeft) return;
+
 		if ((birdTop <= topPipeBottom && ((birdLeft >= topPipeLeft && birdLeft <= topPipeRight) || (birdLeft <= topPipeLeft && birdRight >= topPipeLeft))) || (birdBottom >= bottomPipeTop && ((birdLeft >= bottomPipeLeft && birdLeft <= bottomPipeRight) || (birdLeft <= bottomPipeLeft && birdRight >= bottomPipeLeft)))) {
 			this.clearAllIntervals();
 			this.handleGameOver();
+		}
+
+		if(topPipeRight === birdLeft) {
+			this.setState({ points: this.state.points + 1});
 		}
 	};
 
@@ -142,8 +151,8 @@ export default class Board extends Component {
 
 	scrollPipeTimer = () => {
 		this.setState({ pipePosX: this.state.pipePosX - 1 }, () => {
-			this.checkPipeOffScreen()
-			this.checkCollision()
+			this.checkPipeOffScreen();
+			this.checkCollision();
 		});
 	};
 
@@ -154,7 +163,7 @@ export default class Board extends Component {
 
 	flapUpTimer = () => this.setState({ posY: this.state.posY - 1 });
 	flapDownTimer = () => {
-		if (this.state.posY === 75) { // if its on the floor
+		if (this.state.posY >= 92) { // if its on the floor
 			clearInterval(this.state.flapDownInterval);
 			this.flapDownInterval = null;
 		} else this.setState({ posY: this.state.posY + 1 });
@@ -203,7 +212,7 @@ export default class Board extends Component {
 	};
 
 	render() {
-		const { posY, pipePosX, startDisplay, gameOverDisplay } = this.state;
+		const { posY, pipePosX, points, startDisplay, gameOverDisplay } = this.state;
 		return(
 			<StyledBoard>
 				<div
@@ -223,9 +232,13 @@ export default class Board extends Component {
 					<button onClick = { this.handleStart }>START</button>
 				</div>
 
+				<p>{ points }</p>
+
 				<div className = 'modal' style = {{ display: `${ gameOverDisplay }` }}>
 					<div className = 'game-over-box'>
 						<h3>Game Over!</h3>
+
+						<p>Points: { points }</p>
 
 						<button onClick = { this.handleStart }>Restart</button>
 					</div>
