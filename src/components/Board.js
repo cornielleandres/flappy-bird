@@ -10,6 +10,14 @@ const StyledBoard = styled.div`
 		height: 90vh;
 		position: relative;
 
+		.top-pipe {
+			background-color: green;
+			width: 5vh;
+			height: 50vh;
+			position: absolute;
+			top: 0;
+		}
+
 		#bird {
 			background-color: blue;
 			width: 5vh;
@@ -25,13 +33,63 @@ export default class Board extends Component {
 		posY: 75,
 		flapUpInterval: null,
 		flapDownInterval: null,
+		scrollTopPipeInterval: null,
+		topPipePosX: 50,
 		milliseconds: 25,
 	};
+
+	topPipe = null;
+	bird = null;
 
 	flapUpInterval = null;
 	flapDownInterval = null;
 
-	flapUpTimer = () => this.setState({ posY: this.state.posY - 1 });
+	scrollTopPipeInterval = null;
+
+	clearAllIntervals = () => {
+		this.handleKeyDown = null;
+		this.handleKeyUp = null;
+		clearInterval(this.state.flapDownInterval);
+		this.flapDownInterval = null;
+		clearInterval(this.state.flapUpInterval);
+		this.flapUpInterval = null;
+	};
+
+	checkCollision = () => {
+		const {
+			top: birdTop,
+			left: birdLeft,
+			right: birdRight,
+		} = this.bird.getBoundingClientRect();
+
+		const {
+			bottom: topPipeBottom,
+			left: topPipeLeft,
+			right: topPipeRight,
+		} = this.topPipe.getBoundingClientRect();
+
+		if (birdTop <= topPipeBottom && ((birdLeft >= topPipeLeft && birdLeft <= topPipeRight) || (birdLeft <= topPipeLeft && birdRight >= topPipeLeft))) {
+			this.clearAllIntervals();
+			console.log('HIT!');
+		}
+	};
+
+	checkTopPipeOffScreen = () => {
+		if (this.topPipe.getBoundingClientRect().left <= 0) {
+			clearInterval(this.state.scrollTopPipeInterval);
+		}
+	};
+
+	scrollTopPipeTimer = () => {
+		this.setState({ topPipePosX: this.state.topPipePosX - 1 }, () => this.checkTopPipeOffScreen());
+	}
+
+	scrollTopPipe = () => {
+		this.scrollTopPipeInterval = () => setInterval(this.scrollTopPipeTimer, this.state.milliseconds);
+		this.setState({ scrollTopPipeInterval: this.scrollTopPipeInterval() });
+	};
+
+	flapUpTimer = () => this.setState({ posY: this.state.posY - 1 }, () => this.checkCollision());
 	flapDownTimer = () => {
 		if (this.state.posY === 75) {
 			clearInterval(this.state.flapDownInterval);
@@ -73,8 +131,12 @@ export default class Board extends Component {
 		}
 	};
 
+	componentDidMount() {
+		this.scrollTopPipe();
+	};
+
 	render() {
-		const { posY } = this.state;
+		const { posY, topPipePosX } = this.state;
 		return(
 			<StyledBoard>
 				<div
@@ -83,8 +145,8 @@ export default class Board extends Component {
 					onKeyDown = { this.handleKeyDown }
 					onKeyUp = { this.handleKeyUp}
 				>
-					Screen
-					<div id = 'bird' style={{ top: `${posY}%` }}></div>
+					<div ref = { e => this.topPipe = e } className = 'top-pipe' style={{ left: `${ topPipePosX }%` }} />
+					<div ref = { e => this.bird = e } id = 'bird' style={{ top: `${ posY }%` }} />
 				</div>
 			</StyledBoard>
 		);
