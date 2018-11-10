@@ -12,7 +12,7 @@ const StyledBoard = styled.div`
 		background-color: #aaa;
 		border: 1px solid black;
 		border-radius: 5px;
-		width: 99%;
+		width: 1000px;
 		height: 500px;
 		position: relative;
 
@@ -157,7 +157,7 @@ export default class Board extends Component {
 	};
 
 	checkPipeOffScreen = () => {
-		if (this.topPipe.getBoundingClientRect().left <= 0) {
+		if (this.state.pipePosX <= 1) {
 			let newTopPipeLength = 0;
 			let newBottomPipeLength = 0;
 			if (this.getRandomIntInclusive(0, 1)) {
