@@ -28,7 +28,7 @@ const StyledBoard = styled.div`
 			width: 5vw;
 			height: 5vw;
 			position: absolute;
-			left: 35%;
+			left: 20%;
 		}
 
 		.bottom-pipe {
@@ -103,6 +103,9 @@ export default class Board extends Component {
 	scrollPipeInterval = null;
 	pipePassedPoints = 1;
 
+	startBtn = null;
+	restartBtn = null;
+
 	clearAllIntervals = () => {
 		const intervals = [
 			this.state.flapDownInterval,
@@ -148,9 +151,10 @@ export default class Board extends Component {
 	};
 
 	getRandomIntInclusive = (min, max) => {
+		//The maximum is inclusive and the minimum is inclusive 
 		min = Math.ceil(min);
 		max = Math.floor(max);
-		return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
+		return Math.floor(Math.random() * (max - min + 1)) + min;
 	};
 
 	checkPipeOffScreen = () => {
@@ -212,7 +216,7 @@ export default class Board extends Component {
 	};
 
 	handleKeyDown = e => {
-		if (e.key === 'ArrowUp' && this.state.startDisplay === 'none' && this.state.gameOverDisplay === 'none') {
+		if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && this.state.startDisplay === 'none' && this.state.gameOverDisplay === 'none') {
 			clearInterval(this.state.flapDownInterval);
 			this.flapDownInterval = null;
 			this.flapUp();
@@ -220,7 +224,7 @@ export default class Board extends Component {
 	};
 
 	handleKeyUp = e => {
-		if (e.key === 'ArrowUp' && this.state.startDisplay === 'none' && this.state.gameOverDisplay === 'none') {
+		if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && this.state.startDisplay === 'none' && this.state.gameOverDisplay === 'none') {
 			clearInterval(this.state.flapUpInterval);
 			this.flapUpInterval = null;
 			this.flapDown();
@@ -236,8 +240,12 @@ export default class Board extends Component {
 	};
 
 	handleGameOver = () => {
-		this.setState({ gameOverDisplay: 'flex' });
+		this.setState({ gameOverDisplay: 'flex' }, () => this.restartBtn.focus());
 	};
+
+	componentDidMount() {
+		this.startBtn.focus();
+	}
 
 	render() {
 		const {
@@ -265,7 +273,7 @@ export default class Board extends Component {
 				</div>
 
 				<div className = 'modal' style = {{ display: `${ startDisplay }` }}>
-					<button onClick = { this.handleStart }>START</button>
+					<button ref = { e => this.startBtn = e } onClick = { this.handleStart }>START</button>
 				</div>
 
 				<p>{ points }</p>
@@ -276,7 +284,7 @@ export default class Board extends Component {
 
 						<p>Points: { points }</p>
 
-						<button onClick = { this.handleStart }>Restart</button>
+						<button ref = { e => this.restartBtn = e } onClick = { this.handleStart }>Restart</button>
 					</div>
 				</div>
 			</StyledBoard>
