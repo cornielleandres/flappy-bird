@@ -16,7 +16,7 @@ const StyledBoard = styled.div`
 
 		.top-pipe {
 			background-color: green;
-			width: 5vh;
+			width: 5vw;
 			height: 30vh;
 			position: absolute;
 			top: 0;
@@ -24,22 +24,22 @@ const StyledBoard = styled.div`
 
 		#bird {
 			background-color: blue;
-			width: 5vh;
-			height: 5vh;
+			width: 5vw;
+			height: 5vw;
 			position: absolute;
 			left: 50%;
 		}
 
 		.bottom-pipe {
 			background-color: green;
-			width: 5vh;
+			width: 5vw;
 			height: 30vh;
 			position: absolute;
 			bottom: 0;
 		}
 	}
 
-	.start-modal {
+	.modal {
 		background-color: rgba(0, 0, 0, 0.8);
 		position: fixed;
 		z-index: 1;
@@ -49,19 +49,41 @@ const StyledBoard = styled.div`
 		width: 100vw;
 		justify-content: center;
 		align-items: center;
+
+		.game-over-box {
+			background-color: #F0EAD6;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 50vw;
+			height: 25vh;
+			border-radius: 5px;
+			padding: 5px;
+			flex-wrap: wrap;
+			flex-direction: column;
+
+			* {
+				margin: 10px;
+			}
+		}
 	}
 `;
 
+const initialPipePosX = 85;
+
+const initialState = {
+	posY: 50,
+	flapUpInterval: null,
+	flapDownInterval: null,
+	scrollTopPipeInterval: null,
+	pipePosX: initialPipePosX,
+	milliseconds: 25,
+	startDisplay: 'flex',
+	gameOverDisplay: 'none',
+};
+
 export default class Board extends Component {
-	state = {
-		posY: 50,
-		flapUpInterval: null,
-		flapDownInterval: null,
-		scrollTopPipeInterval: null,
-		pipePosX: 100,
-		milliseconds: 25,
-		startDisplay: 'flex',
-	};
+	state = initialState;
 
 	screen = null;
 
@@ -81,8 +103,6 @@ export default class Board extends Component {
 			this.state.scrollPipeInterval,
 		];
 		intervals.forEach(clearInterval);
-		this.handleKeyDown = null;
-		this.handleKeyUp = null;
 		this.flapDownInterval = null;
 		this.flapUpInterval = null;
 		this.scrollPipeInterval = null;
@@ -110,12 +130,13 @@ export default class Board extends Component {
 
 		if ((birdTop <= topPipeBottom && ((birdLeft >= topPipeLeft && birdLeft <= topPipeRight) || (birdLeft <= topPipeLeft && birdRight >= topPipeLeft))) || (birdBottom >= bottomPipeTop && ((birdLeft >= bottomPipeLeft && birdLeft <= bottomPipeRight) || (birdLeft <= bottomPipeLeft && birdRight >= bottomPipeLeft)))) {
 			this.clearAllIntervals();
+			this.handleGameOver();
 		}
 	};
 
 	checkPipeOffScreen = () => {
 		if (this.topPipe.getBoundingClientRect().left <= 0) {
-			this.setState({ pipePosX: 100 });
+			this.setState({ pipePosX: initialPipePosX });
 		}
 	};
 
@@ -136,7 +157,7 @@ export default class Board extends Component {
 		if (this.state.posY === 75) { // if its on the floor
 			clearInterval(this.state.flapDownInterval);
 			this.flapDownInterval = null;
-		} else this.setState({ posY: this.state.posY + 0.5 });
+		} else this.setState({ posY: this.state.posY + 1 });
 	};
 
 	flapUp = () => {
@@ -154,7 +175,7 @@ export default class Board extends Component {
 	};
 
 	handleKeyDown = e => {
-		if (e.key === 'ArrowUp') {
+		if (e.key === 'ArrowUp' && this.state.startDisplay === 'none' && this.state.gameOverDisplay === 'none') {
 			clearInterval(this.state.flapDownInterval);
 			this.flapDownInterval = null;
 			this.flapUp();
@@ -162,27 +183,27 @@ export default class Board extends Component {
 	};
 
 	handleKeyUp = e => {
-		if (e.key === 'ArrowUp') {
-			setTimeout(() => {
-				clearInterval(this.state.flapUpInterval);
-				this.flapUpInterval = null;
-				setTimeout(() => {
-					this.flapDown();
-				}, 25); // how much to wait before going back down
-			}, 75); // how much farther up it goes without stopping
+		if (e.key === 'ArrowUp' && this.state.startDisplay === 'none' && this.state.gameOverDisplay === 'none') {
+			clearInterval(this.state.flapUpInterval);
+			this.flapUpInterval = null;
+			this.flapDown();
 		}
 	};
 
 	handleStart = () => {
-		this.setState({ startDisplay: 'none' }, () => {
+		this.setState(initialState, () => this.setState({ startDisplay: 'none' }, () => {
 			this.screen.focus();
 			this.scrollPipe();
 			this.flapDown();
-		});
+		}));
+	};
+
+	handleGameOver = () => {
+		this.setState({ gameOverDisplay: 'flex' });
 	};
 
 	render() {
-		const { posY, pipePosX, startDisplay } = this.state;
+		const { posY, pipePosX, startDisplay, gameOverDisplay } = this.state;
 		return(
 			<StyledBoard>
 				<div
@@ -192,14 +213,22 @@ export default class Board extends Component {
 					onKeyDown = { this.handleKeyDown }
 					onKeyUp = { this.handleKeyUp}
 				>
-					<div ref = { e => this.topPipe = e } className = 'top-pipe' style = {{ left: `${ pipePosX }%` }} />
+					<div ref = { e => this.topPipe = e } className = 'top-pipe' style = {{ left: `${ pipePosX }vw` }} />
 					<div ref = { e => this.bird = e } id = 'bird' style = {{ top: `${ posY }%` }} />
 
-					<div ref = { e => this.bottomPipe = e } className = 'bottom-pipe' style = {{ left: `${ pipePosX }%` }} />
+					<div ref = { e => this.bottomPipe = e } className = 'bottom-pipe' style = {{ left: `${ pipePosX }vw` }} />
 				</div>
 
-				<div className = 'start-modal' style = {{ display: `${ startDisplay }` }}>
+				<div className = 'modal' style = {{ display: `${ startDisplay }` }}>
 					<button onClick = { this.handleStart }>START</button>
+				</div>
+
+				<div className = 'modal' style = {{ display: `${ gameOverDisplay }` }}>
+					<div className = 'game-over-box'>
+						<h3>Game Over!</h3>
+
+						<button onClick = { this.handleStart }>Restart</button>
+					</div>
 				</div>
 			</StyledBoard>
 		);
