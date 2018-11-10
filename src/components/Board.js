@@ -75,6 +75,7 @@ const initialIntervalTime = 25;
 
 const initialState = {
 	birdPosY: 50,
+	cursor: 'default',
 	flapUpInterval: null,
 	flapDownInterval: null,
 	scrollTopPipeInterval: null,
@@ -231,7 +232,7 @@ export default class Board extends Component {
 	};
 
 	handleStart = () => {
-		this.setState(initialState, () => this.setState({ startDisplay: 'none' }, () => {
+		this.setState(initialState, () => this.setState({ startDisplay: 'none', cursor: 'none' }, () => {
 			this.screen.focus();
 			this.scrollPipe();
 			this.flapDown();
@@ -239,7 +240,7 @@ export default class Board extends Component {
 	};
 
 	handleGameOver = () => {
-		this.setState({ gameOverDisplay: 'flex' }, () => this.restartBtn.focus());
+		this.setState({ gameOverDisplay: 'flex', cursor: 'default' }, () => this.restartBtn.focus());
 	};
 
 	componentDidMount() {
@@ -249,6 +250,7 @@ export default class Board extends Component {
 	render() {
 		const {
 			birdPosY,
+			cursor,
 			pipePosX,
 			topPipeLength,
 			bottomPipeLength,
@@ -264,6 +266,7 @@ export default class Board extends Component {
 					tabIndex = '0'
 					onKeyDown = { this.handleKeyDown }
 					onKeyUp = { this.handleKeyUp}
+					style = {{ cursor: `${ cursor }` }}
 				>
 					<div ref = { e => this.topPipe = e } className = 'pipe top-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ topPipeLength }px` }} />
 
