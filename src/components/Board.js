@@ -19,7 +19,6 @@ const StyledBoard = styled.div`
 		.top-pipe {
 			background-color: green;
 			width: 5vw;
-			height: 30vh;
 			position: absolute;
 			top: 0;
 		}
@@ -35,7 +34,6 @@ const StyledBoard = styled.div`
 		.bottom-pipe {
 			background-color: green;
 			width: 5vw;
-			height: 30vh;
 			position: absolute;
 			bottom: 0;
 		}
@@ -72,6 +70,7 @@ const StyledBoard = styled.div`
 `;
 
 const initialPipePosX = 85;
+const initialPipeLength = 35;
 
 const initialState = {
 	posY: 50,
@@ -83,6 +82,8 @@ const initialState = {
 	points: 0,
 	startDisplay: 'flex',
 	gameOverDisplay: 'none',
+	topPipeLength: initialPipeLength,
+	bottomPipeLength: initialPipeLength,
 };
 
 export default class Board extends Component {
@@ -139,13 +140,32 @@ export default class Board extends Component {
 		}
 
 		if(topPipeRight === birdLeft) {
-			this.setState({ points: this.state.points + 1});
+			this.setState({ points: this.state.points + 1 });
 		}
 	};
 
+	getRandomIntInclusive = (min, max) => {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
+	}
+
 	checkPipeOffScreen = () => {
 		if (this.topPipe.getBoundingClientRect().left <= 0) {
-			this.setState({ pipePosX: initialPipePosX });
+			let newTopPipeLength = 0;
+			let newBottomPipeLength = 0;
+			if (this.getRandomIntInclusive(0, 1)) {
+				newTopPipeLength = this.getRandomIntInclusive(0, initialPipeLength);
+				newBottomPipeLength = 60 - newTopPipeLength;
+			} else {
+				newBottomPipeLength = this.getRandomIntInclusive(0, initialPipeLength);
+				newTopPipeLength = 60 - newBottomPipeLength;
+			}
+			this.setState({
+				pipePosX: initialPipePosX,
+				topPipeLength: newTopPipeLength,
+				bottomPipeLength: newBottomPipeLength,
+			});
 		}
 	};
 
@@ -212,7 +232,15 @@ export default class Board extends Component {
 	};
 
 	render() {
-		const { posY, pipePosX, points, startDisplay, gameOverDisplay } = this.state;
+		const {
+			posY,
+			pipePosX,
+			topPipeLength,
+			bottomPipeLength,
+			points,
+			startDisplay,
+			gameOverDisplay
+		} = this.state;
 		return(
 			<StyledBoard>
 				<div
@@ -222,10 +250,10 @@ export default class Board extends Component {
 					onKeyDown = { this.handleKeyDown }
 					onKeyUp = { this.handleKeyUp}
 				>
-					<div ref = { e => this.topPipe = e } className = 'top-pipe' style = {{ left: `${ pipePosX }vw` }} />
+					<div ref = { e => this.topPipe = e } className = 'top-pipe' style = {{ left: `${ pipePosX }vw`, height: `${ topPipeLength }vh` }} />
 					<div ref = { e => this.bird = e } id = 'bird' style = {{ top: `${ posY }%` }} />
 
-					<div ref = { e => this.bottomPipe = e } className = 'bottom-pipe' style = {{ left: `${ pipePosX }vw` }} />
+					<div ref = { e => this.bottomPipe = e } className = 'bottom-pipe' style = {{ left: `${ pipePosX }vw`, height: `${ bottomPipeLength }vh` }} />
 				</div>
 
 				<div className = 'modal' style = {{ display: `${ startDisplay }` }}>
