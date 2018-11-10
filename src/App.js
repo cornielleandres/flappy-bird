@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 
+// Components
+import { Board } from './components/index.js';
+
 class App extends Component {
 	render() {
 		return (
@@ -7,6 +10,8 @@ class App extends Component {
 				<header className = 'App-header'>
 					Flappy Bird Clone
 				</header>
+
+				<Board />
 			</div>
 		);
 	}
