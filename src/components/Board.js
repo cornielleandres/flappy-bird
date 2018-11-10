@@ -12,29 +12,29 @@ const StyledBoard = styled.div`
 		background-color: #aaa;
 		border: 1px solid black;
 		border-radius: 5px;
-		width: 90vw;
-		height: 90vh;
+		width: 99%;
+		height: 500px;
 		position: relative;
 
-		.top-pipe {
+		.pipe {
 			background-color: green;
-			width: 5vw;
+			width: 35px;
 			position: absolute;
+		}
+
+		.top-pipe {
 			top: 0;
 		}
 
 		#bird {
 			background-color: blue;
-			width: 5vw;
-			height: 5vw;
+			width: 35px;
+			height: 35px;
 			position: absolute;
 			left: 20%;
 		}
 
 		.bottom-pipe {
-			background-color: green;
-			width: 5vw;
-			position: absolute;
 			bottom: 0;
 		}
 	}
@@ -69,18 +69,17 @@ const StyledBoard = styled.div`
 	}
 `;
 
-const initialPipePosX = 85;
-const initialPipeLength = 35;
-const initialPipeMilliseconds = 25;
+const initialPipePosX = 100;
+const initialPipeLength = 180;
+const initialIntervalTime = 25;
 
 const initialState = {
-	posY: 50,
+	birdPosY: 50,
 	flapUpInterval: null,
 	flapDownInterval: null,
 	scrollTopPipeInterval: null,
 	pipePosX: initialPipePosX,
-	milliseconds: 25,
-	pipesMilliseconds: initialPipeMilliseconds,
+	intervalTime: initialIntervalTime,
 	points: 0,
 	startDisplay: 'flex',
 	gameOverDisplay: 'none',
@@ -142,10 +141,10 @@ export default class Board extends Component {
 
 		if ((birdTop <= topPipeBottom && ((birdLeft >= topPipeLeft && birdLeft <= topPipeRight) || (birdLeft <= topPipeLeft && birdRight >= topPipeLeft))) || (birdBottom >= bottomPipeTop && ((birdLeft >= bottomPipeLeft && birdLeft <= bottomPipeRight) || (birdLeft <= bottomPipeLeft && birdRight >= bottomPipeLeft)))) {
 			this.clearAllIntervals();
-			this.handleGameOver();
+			return this.handleGameOver();
 		}
 
-		if(topPipeRight >= birdLeft && this.pipePassedPoints != 0) {
+		if(topPipeRight <= birdLeft && this.pipePassedPoints !== 0) {
 			this.setState({ points: this.state.points + this.pipePassedPoints }, () => this.pipePassedPoints = 0);
 		}
 	};
@@ -163,10 +162,10 @@ export default class Board extends Component {
 			let newBottomPipeLength = 0;
 			if (this.getRandomIntInclusive(0, 1)) {
 				newTopPipeLength = this.getRandomIntInclusive(0, initialPipeLength);
-				newBottomPipeLength = 60 - newTopPipeLength;
+				newBottomPipeLength = (2 * initialPipeLength) - newTopPipeLength;
 			} else {
 				newBottomPipeLength = this.getRandomIntInclusive(0, initialPipeLength);
-				newTopPipeLength = 60 - newBottomPipeLength;
+				newTopPipeLength = (2 * initialPipeLength) - newBottomPipeLength;
 			}
 			clearInterval(this.state.scrollPipeInterval);
 			this.scrollPipeInterval = null;
@@ -175,7 +174,7 @@ export default class Board extends Component {
 				pipePosX: initialPipePosX,
 				topPipeLength: newTopPipeLength,
 				bottomPipeLength: newBottomPipeLength,
-				pipesMilliseconds: this.state.pipesMilliseconds !== 0 ? this.state.pipesMilliseconds - 1 : 0,
+				intervalTime: this.state.intervalTime !== 0 ? this.state.intervalTime - 1 : 0,
 			}, () => this.scrollPipe());
 		}
 	};
@@ -188,29 +187,29 @@ export default class Board extends Component {
 	};
 
 	scrollPipe = () => {
-		this.scrollPipeInterval = () => setInterval(this.scrollPipeTimer, this.state.pipesMilliseconds);
+		this.scrollPipeInterval = () => setInterval(this.scrollPipeTimer, this.state.intervalTime);
 		this.setState({ scrollPipeInterval: this.scrollPipeInterval() });
 	};
 
-	flapUpTimer = () => this.setState({ posY: this.state.posY - 1 });
+	flapUpTimer = () => this.setState({ birdPosY: this.state.birdPosY - 1 });
 
 	flapDownTimer = () => {
-		if (this.state.posY >= 92) { // if its on the floor
+		if (this.state.birdPosY >= 100) { // if its on the floor
 			clearInterval(this.state.flapDownInterval);
 			this.flapDownInterval = null;
-		} else this.setState({ posY: this.state.posY + 1 });
+		} else this.setState({ birdPosY: this.state.birdPosY + 1 });
 	};
 
 	flapUp = () => {
 		if (this.flapUpInterval === null) {
-			this.flapUpInterval = () => setInterval(this.flapUpTimer, this.state.milliseconds);
+			this.flapUpInterval = () => setInterval(this.flapUpTimer, this.state.intervalTime);
 			this.setState({ flapUpInterval: this.flapUpInterval() });
 		}
 	};
 
 	flapDown = () => {
 		if (this.flapDownInterval === null) {
-			this.flapDownInterval = () => setInterval(this.flapDownTimer, this.state.milliseconds);
+			this.flapDownInterval = () => setInterval(this.flapDownTimer, this.state.intervalTime);
 			this.setState({ flapDownInterval: this.flapDownInterval() });
 		}
 	};
@@ -249,7 +248,7 @@ export default class Board extends Component {
 
 	render() {
 		const {
-			posY,
+			birdPosY,
 			pipePosX,
 			topPipeLength,
 			bottomPipeLength,
@@ -266,10 +265,11 @@ export default class Board extends Component {
 					onKeyDown = { this.handleKeyDown }
 					onKeyUp = { this.handleKeyUp}
 				>
-					<div ref = { e => this.topPipe = e } className = 'top-pipe' style = {{ left: `${ pipePosX }vw`, height: `${ topPipeLength }vh` }} />
-					<div ref = { e => this.bird = e } id = 'bird' style = {{ top: `${ posY }%` }} />
+					<div ref = { e => this.topPipe = e } className = 'pipe top-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ topPipeLength }px` }} />
 
-					<div ref = { e => this.bottomPipe = e } className = 'bottom-pipe' style = {{ left: `${ pipePosX }vw`, height: `${ bottomPipeLength }vh` }} />
+					<div ref = { e => this.bird = e } id = 'bird' style = {{ top: `calc(${ birdPosY }% - 35px)` }} />
+
+					<div ref = { e => this.bottomPipe = e } className = 'pipe bottom-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ bottomPipeLength }px` }} />
 				</div>
 
 				<div className = 'modal' style = {{ display: `${ startDisplay }` }}>
