@@ -28,7 +28,7 @@ const StyledBoard = styled.div`
 			width: 5vw;
 			height: 5vw;
 			position: absolute;
-			left: 50%;
+			left: 35%;
 		}
 
 		.bottom-pipe {
@@ -71,6 +71,7 @@ const StyledBoard = styled.div`
 
 const initialPipePosX = 85;
 const initialPipeLength = 35;
+const initialPipeMilliseconds = 25;
 
 const initialState = {
 	posY: 50,
@@ -79,6 +80,7 @@ const initialState = {
 	scrollTopPipeInterval: null,
 	pipePosX: initialPipePosX,
 	milliseconds: 25,
+	pipesMilliseconds: initialPipeMilliseconds,
 	points: 0,
 	startDisplay: 'flex',
 	gameOverDisplay: 'none',
@@ -99,6 +101,7 @@ export default class Board extends Component {
 	flapDownInterval = null;
 
 	scrollPipeInterval = null;
+	pipePassedPoints = 1;
 
 	clearAllIntervals = () => {
 		const intervals = [
@@ -139,8 +142,8 @@ export default class Board extends Component {
 			this.handleGameOver();
 		}
 
-		if(topPipeRight === birdLeft) {
-			this.setState({ points: this.state.points + 1 });
+		if(topPipeRight >= birdLeft && this.pipePassedPoints != 0) {
+			this.setState({ points: this.state.points + this.pipePassedPoints }, () => this.pipePassedPoints = 0);
 		}
 	};
 
@@ -148,7 +151,7 @@ export default class Board extends Component {
 		min = Math.ceil(min);
 		max = Math.floor(max);
 		return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
-	}
+	};
 
 	checkPipeOffScreen = () => {
 		if (this.topPipe.getBoundingClientRect().left <= 0) {
@@ -161,11 +164,15 @@ export default class Board extends Component {
 				newBottomPipeLength = this.getRandomIntInclusive(0, initialPipeLength);
 				newTopPipeLength = 60 - newBottomPipeLength;
 			}
+			clearInterval(this.state.scrollPipeInterval);
+			this.scrollPipeInterval = null;
+			this.pipePassedPoints = 1;
 			this.setState({
 				pipePosX: initialPipePosX,
 				topPipeLength: newTopPipeLength,
 				bottomPipeLength: newBottomPipeLength,
-			});
+				pipesMilliseconds: this.state.pipesMilliseconds !== 0 ? this.state.pipesMilliseconds - 1 : 0,
+			}, () => this.scrollPipe());
 		}
 	};
 
@@ -177,11 +184,12 @@ export default class Board extends Component {
 	};
 
 	scrollPipe = () => {
-		this.scrollPipeInterval = () => setInterval(this.scrollPipeTimer, this.state.milliseconds);
+		this.scrollPipeInterval = () => setInterval(this.scrollPipeTimer, this.state.pipesMilliseconds);
 		this.setState({ scrollPipeInterval: this.scrollPipeInterval() });
 	};
 
 	flapUpTimer = () => this.setState({ posY: this.state.posY - 1 });
+
 	flapDownTimer = () => {
 		if (this.state.posY >= 92) { // if its on the floor
 			clearInterval(this.state.flapDownInterval);
