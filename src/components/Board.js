@@ -88,7 +88,6 @@ const StyledBoard = styled.div`
 			flex-wrap: wrap;
 			flex-direction: column;
 			width: 50%;
-			height: 200px;
 			border-radius: 5px;
 			padding: 5px;
 			font-family: 'Indie Flower', cursive;
@@ -104,6 +103,7 @@ const StyledBoard = styled.div`
 			p {
 				font-size: 2rem;
 				font-weight: bold;
+				text-align: center;
 
 				.points {
 					font-weight: bold;
