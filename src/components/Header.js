@@ -2,11 +2,13 @@ import React from 'react';
 import styled from 'styled-components';
 
 const StyledHeader = styled.header`
-	padding: 10px;
+	padding: 15px;
 
 	h1 {
 		text-align: center;
-		font-size: 5vh;
+		font-family: 'Indie Flower', cursive;
+		font-size: 7vh;
+		font-weight: bold;
 	}
 `;
 

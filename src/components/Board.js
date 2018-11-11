@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 
+import { bg, bird } from '../assets/index.js';
+
 const StyledBoard = styled.div`
 	display: flex;
 	justify-content: center;
@@ -9,7 +11,8 @@ const StyledBoard = styled.div`
 	flex-direction: column;
 
 	.screen {
-		background-color: #aaa;
+		background-image: url('${ bg }');
+		background-size: cover;
 		border: 1px solid black;
 		border-radius: 5px;
 		width: 1000px;
@@ -27,10 +30,12 @@ const StyledBoard = styled.div`
 		}
 
 		#bird {
-			background-color: blue;
-			width: 35px;
-			height: 35px;
-			position: absolute;
+			background-image: url('${ bird }');
+			background-size: 150% 150%;
+			background-position: 50% 75%;
+			width: 50px;
+			height: 50px;
+			position: relative;
 			left: 20%;
 		}
 
@@ -51,7 +56,8 @@ const StyledBoard = styled.div`
 		align-items: center;
 
 		.game-over-box {
-			background-color: #F0EAD6;
+			// background-color: #F0EAD6;
+			background-color: rgba(0, 0, 0, 0);
 			display: flex;
 			justify-content: center;
 			align-items: center;
@@ -70,7 +76,7 @@ const StyledBoard = styled.div`
 `;
 
 const initialPipePosX = 100;
-const initialPipeLength = 180;
+const initialPipeLength = 150;
 const initialIntervalTime = 25;
 
 const initialState = {
@@ -192,10 +198,17 @@ export default class Board extends Component {
 		this.setState({ scrollPipeInterval: this.scrollPipeInterval() });
 	};
 
-	flapUpTimer = () => this.setState({ birdPosY: this.state.birdPosY - 1 });
+	// flapUpTimer = () => this.setState({ birdPosY: this.state.birdPosY - 1 });
+
+	flapUpTimer = () => {
+		if (this.state.birdPosY <= 1) { // if its on the ceiling
+			clearInterval(this.state.flapUpInterval);
+			this.flapUpInterval = null;
+		} else this.setState({ birdPosY: this.state.birdPosY - 1 });
+	};
 
 	flapDownTimer = () => {
-		if (this.state.birdPosY >= 100) { // if its on the floor
+		if (this.state.birdPosY >= 90) { // if its on the floor
 			clearInterval(this.state.flapDownInterval);
 			this.flapDownInterval = null;
 		} else this.setState({ birdPosY: this.state.birdPosY + 1 });
@@ -270,7 +283,7 @@ export default class Board extends Component {
 				>
 					<div ref = { e => this.topPipe = e } className = 'pipe top-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ topPipeLength }px` }} />
 
-					<div ref = { e => this.bird = e } id = 'bird' style = {{ top: `calc(${ birdPosY }% - 35px)` }} />
+					<div ref = { e => this.bird = e } id = 'bird' style = {{ top: `${ birdPosY }%` }} />
 
 					<div ref = { e => this.bottomPipe = e } className = 'pipe bottom-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ bottomPipeLength }px` }} />
 				</div>
