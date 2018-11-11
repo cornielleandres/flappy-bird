@@ -217,7 +217,7 @@ export default class Board extends Component {
 				pipePosX: initialPipePosX,
 				topPipeLength: newTopPipeLength,
 				bottomPipeLength: newBottomPipeLength,
-				intervalTime: this.state.intervalTime !== 0 ? this.state.intervalTime - 1 : 0,
+				intervalTime: this.state.intervalTime !== 10 ? this.state.intervalTime - 1 : 10,
 			}, () => this.scrollPipe());
 		}
 	};
@@ -345,9 +345,9 @@ export default class Board extends Component {
 					<div className = 'box'>
 						<h3>Game Over!</h3>
 
-						<p><span className = 'points'>{ points }</span>points</p>
+						<p><span className = 'points'>{ points }</span>point{ points !== 1 && 's' }</p>
 
-						<p className = 'instructions'>Press Enter or Space to begin.</p>
+						<p className = 'instructions'>Press Enter or Space to restart.</p>
 					</div>
 				</div>
 			</StyledBoard>
