@@ -25,10 +25,20 @@ const StyledBoard = styled.div`
 			background-color: green;
 			width: 35px;
 			position: absolute;
+			display: flex;
+
+			.pipe-head {
+				background-color: green;
+				height: 10px;
+				width: 45px;
+				position: absolute;
+				left: -5px;
+			}
 		}
 
 		.top-pipe {
 			top: 0;
+			align-items: flex-end;
 		}
 
 		#bird {
@@ -326,11 +336,11 @@ export default class Board extends Component {
 					onKeyUp = { this.handleKeyUp}
 					style = {{ cursor: `${ cursor }` }}
 				>
-					<div ref = { e => this.topPipe = e } className = 'pipe top-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ topPipeLength }px` }} />
+					<div ref = { e => this.topPipe = e } className = 'pipe top-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ topPipeLength }px` }}><div className = 'pipe-head'></div></div>
 
 					<div ref = { e => this.bird = e } id = 'bird' style = {{ top: `${ birdPosY }%` }} />
 
-					<div ref = { e => this.bottomPipe = e } className = 'pipe bottom-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ bottomPipeLength }px` }} />
+					<div ref = { e => this.bottomPipe = e } className = 'pipe bottom-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ bottomPipeLength }px` }}><div className = 'pipe-head'></div></div>
 				</div>
 
 				<div ref = { e => this.startModal = e } tabIndex = '-1' onKeyPress = { this.handleClickModal } className = 'modal' style = {{ display: `${ startDisplay }` }}>
