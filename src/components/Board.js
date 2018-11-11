@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import { TweenMax } from 'gsap';
 
-import { bg, bird } from '../assets/index.js';
+import { bg, bird, ding } from '../assets/index.js';
 
 const StyledBoard = styled.div`
 	display: flex;
@@ -93,7 +94,7 @@ const StyledBoard = styled.div`
 				font-size: 2rem;
 				font-weight: bold;
 
-				#points {
+				.points {
 					font-weight: bold;
 					color: lime;
 				}
@@ -125,6 +126,7 @@ export default class Board extends Component {
 	state = initialState;
 
 	screen = null;
+	dingSound = null;
 
 	topPipe = null;
 	bird = null;
@@ -179,7 +181,12 @@ export default class Board extends Component {
 		}
 
 		if(topPipeRight <= birdLeft && this.pipePassedPoints !== 0) {
-			this.setState({ points: this.state.points + this.pipePassedPoints }, () => this.pipePassedPoints = 0);
+			this.dingSound.pause();
+			this.setState({ points: this.state.points + this.pipePassedPoints }, () => {
+				this.dingSound.play();
+				this.pipePassedPoints = 0;
+				TweenMax.fromTo(this.screen, 1, { opacity: 0.2 }, { opacity: 1 });
+			});
 		}
 	};
 
@@ -282,6 +289,7 @@ export default class Board extends Component {
 	};
 
 	componentDidMount() {
+		this.dingSound = new Audio(ding);
 		this.startBtn.focus();
 	}
 
@@ -321,13 +329,11 @@ export default class Board extends Component {
 					</div>
 				</div>
 
-				<p>{ points }</p>
-
 				<div className = 'modal' style = {{ display: `${ gameOverDisplay }` }}>
 					<div className = 'box'>
 						<h3>Game Over!</h3>
 
-						<p><span id = 'points'>{ points }</span>points</p>
+						<p><span className = 'points'>{ points }</span>points</p>
 
 						<button ref = { e => this.restartBtn = e } onClick = { this.handleStart }>Restart</button>
 					</div>
