@@ -55,7 +55,20 @@ const StyledBoard = styled.div`
 		justify-content: center;
 		align-items: center;
 
-		.game-over-box {
+		button {
+			border-radius: 10px;
+			padding: 5px 10px;
+			font-family: 'Indie Flower', cursive;
+			font-size: 1.6rem;
+			font-weight: bold;
+
+			&:hover {
+				background-color: rgba(240, 234, 214, 0.4);
+				cursor: pointer;
+			}
+		}
+
+		.box {
 			background-color: rgba(240, 234, 214, 0.4);
 			display: flex;
 			justify-content: center;
@@ -76,24 +89,13 @@ const StyledBoard = styled.div`
 				font-size: 3rem;
 			}
 
-			.points {
+			p {
 				font-size: 2rem;
+				font-weight: bold;
 
 				#points {
 					font-weight: bold;
 					color: lime;
-				}
-			}
-
-			button {
-				border-radius: 10px;
-				padding: 5px 10px;
-				font-family: 'Indie Flower', cursive;
-				font-size: 1.6rem;
-
-				&:hover {
-					background-color: rgba(240, 234, 214, 0.4);
-					cursor: pointer;
 				}
 			}
 		}
@@ -312,16 +314,20 @@ export default class Board extends Component {
 				</div>
 
 				<div className = 'modal' style = {{ display: `${ startDisplay }` }}>
-					<button ref = { e => this.startBtn = e } onClick = { this.handleStart }>START</button>
+					<div className = 'box'>
+						<button ref = { e => this.startBtn = e } onClick = { this.handleStart }>START</button>
+
+						<p className = 'instructions'>Click up arrow or w key to flap.</p>
+					</div>
 				</div>
 
 				<p>{ points }</p>
 
 				<div className = 'modal' style = {{ display: `${ gameOverDisplay }` }}>
-					<div className = 'game-over-box'>
+					<div className = 'box'>
 						<h3>Game Over!</h3>
 
-						<p className = 'points'><span id = 'points'>{ points }</span>points</p>
+						<p><span id = 'points'>{ points }</span>points</p>
 
 						<button ref = { e => this.restartBtn = e } onClick = { this.handleStart }>Restart</button>
 					</div>
