@@ -7,7 +7,7 @@ const StyledHeader = styled.header`
 	h1 {
 		text-align: center;
 		font-family: 'Indie Flower', cursive;
-		font-size: 7vh;
+		font-size: 3rem;
 		font-weight: bold;
 	}
 `;

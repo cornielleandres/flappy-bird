@@ -50,26 +50,51 @@ const StyledBoard = styled.div`
 		z-index: 1;
 		top: 0;
 		left: 0;
-		height: 100vh;
-		width: 100vw;
+		height: 100%;
+		width: 100%;
 		justify-content: center;
 		align-items: center;
 
 		.game-over-box {
-			// background-color: #F0EAD6;
-			background-color: rgba(0, 0, 0, 0);
+			background-color: rgba(240, 234, 214, 0.4);
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			width: 50vw;
-			height: 25vh;
-			border-radius: 5px;
-			padding: 5px;
 			flex-wrap: wrap;
 			flex-direction: column;
+			width: 50%;
+			height: 200px;
+			border-radius: 5px;
+			padding: 5px;
+			font-family: 'Indie Flower', cursive;
 
 			* {
 				margin: 10px;
+			}
+
+			h3 {
+				font-size: 3rem;
+			}
+
+			.points {
+				font-size: 2rem;
+
+				#points {
+					font-weight: bold;
+					color: lime;
+				}
+			}
+
+			button {
+				border-radius: 10px;
+				padding: 5px 10px;
+				font-family: 'Indie Flower', cursive;
+				font-size: 1.6rem;
+
+				&:hover {
+					background-color: rgba(240, 234, 214, 0.4);
+					cursor: pointer;
+				}
 			}
 		}
 	}
@@ -198,8 +223,6 @@ export default class Board extends Component {
 		this.setState({ scrollPipeInterval: this.scrollPipeInterval() });
 	};
 
-	// flapUpTimer = () => this.setState({ birdPosY: this.state.birdPosY - 1 });
-
 	flapUpTimer = () => {
 		if (this.state.birdPosY <= 1) { // if its on the ceiling
 			clearInterval(this.state.flapUpInterval);
@@ -298,7 +321,7 @@ export default class Board extends Component {
 					<div className = 'game-over-box'>
 						<h3>Game Over!</h3>
 
-						<p>Points: { points }</p>
+						<p className = 'points'><span id = 'points'>{ points }</span>points</p>
 
 						<button ref = { e => this.restartBtn = e } onClick = { this.handleStart }>Restart</button>
 					</div>
