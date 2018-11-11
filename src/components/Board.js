@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import { TweenMax } from 'gsap';
 
-import { bg, bird, ding } from '../assets/index.js';
+// Images and Sounds
+import { bg, bird, ding, gameOverSound } from '../assets/index.js';
 
 const StyledBoard = styled.div`
 	display: flex;
@@ -127,6 +128,10 @@ export default class Board extends Component {
 
 	screen = null;
 	dingSound = null;
+	gameOverSound = null;
+
+	startModal = null;
+	gameOverModal = null;
 
 	topPipe = null;
 	bird = null;
@@ -137,9 +142,6 @@ export default class Board extends Component {
 
 	scrollPipeInterval = null;
 	pipePassedPoints = 1;
-
-	startBtn = null;
-	restartBtn = null;
 
 	clearAllIntervals = () => {
 		const intervals = [
@@ -276,22 +278,32 @@ export default class Board extends Component {
 		}
 	};
 
+	handleClickModal = e => (e.key === ' ' || e.key === 'Enter') && this.handleStart();
+
 	handleStart = () => {
-		this.setState(initialState, () => this.setState({ startDisplay: 'none', cursor: 'none' }, () => {
+		this.setState(initialState, () => this.setState({
+			startDisplay: 'none',
+			cursor: 'none',
+		}, () => {
 			this.screen.focus();
 			this.scrollPipe();
 			this.flapDown();
 		}));
 	};
 
-	handleGameOver = () => {
-		this.setState({ gameOverDisplay: 'flex', cursor: 'default' }, () => this.restartBtn.focus());
-	};
+	handleGameOver = () => this.setState({
+		gameOverDisplay: 'flex',
+		cursor: 'default',
+	}, () => {
+		this.gameOverModal.focus();
+		this.gameOverSound.play();
+	});
 
 	componentDidMount() {
+		this.startModal.focus();
 		this.dingSound = new Audio(ding);
-		this.startBtn.focus();
-	}
+		this.gameOverSound = new Audio(gameOverSound);
+	};
 
 	render() {
 		const {
@@ -321,21 +333,21 @@ export default class Board extends Component {
 					<div ref = { e => this.bottomPipe = e } className = 'pipe bottom-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ bottomPipeLength }px` }} />
 				</div>
 
-				<div className = 'modal' style = {{ display: `${ startDisplay }` }}>
+				<div ref = { e => this.startModal = e } tabIndex = '-1' onKeyPress = { this.handleClickModal } className = 'modal' style = {{ display: `${ startDisplay }` }}>
 					<div className = 'box'>
-						<button ref = { e => this.startBtn = e } onClick = { this.handleStart }>START</button>
-
 						<p className = 'instructions'>Click up arrow or w key to flap.</p>
+
+						<p className = 'instructions'>Press Enter or Space to begin.</p>
 					</div>
 				</div>
 
-				<div className = 'modal' style = {{ display: `${ gameOverDisplay }` }}>
+				<div ref = { e => this.gameOverModal = e } tabIndex = '-1' onKeyPress = { this.handleClickModal } className = 'modal' style = {{ display: `${ gameOverDisplay }` }}>
 					<div className = 'box'>
 						<h3>Game Over!</h3>
 
 						<p><span className = 'points'>{ points }</span>points</p>
 
-						<button ref = { e => this.restartBtn = e } onClick = { this.handleStart }>Restart</button>
+						<p className = 'instructions'>Press Enter or Space to begin.</p>
 					</div>
 				</div>
 			</StyledBoard>
