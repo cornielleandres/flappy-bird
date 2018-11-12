@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import { TweenMax } from 'gsap';
+import { TweenLite, TimelineLite, Back, TweenMax } from 'gsap';
 
 // Components
 import { Top10, HighScore } from './index.js';
@@ -103,6 +103,11 @@ const StyledBoard = styled.div`
 
 			h3 {
 				font-size: 3rem;
+
+				* {
+					display: inline-block;
+					margin: 0;
+				}
 			}
 
 			p {
@@ -138,6 +143,7 @@ const initialState = {
 	bottomPipeLength: initialPipeLength,
 	top10: [],
 	loadingMsg: '',
+	showTop10Btn: false,
 };
 
 export default class Board extends Component {
@@ -149,6 +155,7 @@ export default class Board extends Component {
 
 	startModal = null;
 	gameOverModal = null;
+	restartBtn = null;
 
 	topPipe = null;
 	bird = null;
@@ -206,10 +213,10 @@ export default class Board extends Component {
 			this.setState({ points: this.state.points + this.pipePassedPoints }, () => {
 				this.dingSound.play();
 				this.pipePassedPoints = 0;
-				TweenMax.fromTo(this.screen, 1, { opacity: 0.2 }, { opacity: 1 });
+				TweenLite.fromTo(this.screen, 1, { opacity: 0.2 }, { opacity: 1 });
 			});
 		}
-	};
+	}; // checkCollision()
 
 	getRandomIntInclusive = (min, max) => {
 		//The maximum is inclusive and the minimum is inclusive 
@@ -219,7 +226,7 @@ export default class Board extends Component {
 	};
 
 	checkPipeOffScreen = () => {
-		if (this.state.pipePosX <= 1) {
+		if (this.state.pipePosX <= 3) {
 			let newTopPipeLength = 0;
 			let newBottomPipeLength = 0;
 			if (this.getRandomIntInclusive(0, 1)) {
@@ -239,7 +246,7 @@ export default class Board extends Component {
 				intervalTime: this.state.intervalTime !== 10 ? this.state.intervalTime - 1 : 10,
 			}, () => this.scrollPipe());
 		}
-	};
+	}; // checkPipeOffScreen()
 
 	scrollPipeTimer = () => {
 		this.setState({ pipePosX: this.state.pipePosX - 1 }, () => {
@@ -310,16 +317,40 @@ export default class Board extends Component {
 		}));
 	};
 
+	focusRestartBtn = () => this.restartBtn.focus();
+
+	showTop10 = () => this.setState({ showTop10Btn: true }, () => {
+		TweenLite.fromTo('#view-top10-btn', 0.5, { y: -1500 }, { y: 0, ease: Back.easeOut.config(1.7) });
+	});
+
 	handleGameOver = () => this.setState({
 		gameOverDisplay: 'flex',
 		cursor: 'default',
 	}, () => {
 		this.gameOverModal.focus();
 		this.gameOverSound.play();
-	});
+
+		const gameOverTimeline = new TimelineLite({});
+		const elemArray = [
+			'#game-over-letters1',
+			'#game-over-letters2',
+			'#game-over-letters3',
+			'#game-over-letters4',
+			'#game-over-letters5',
+			'#game-over-letters6',
+			'#game-over-letters7',
+			'#game-over-letters8',
+			'#game-over-letters9',
+			'#points-p',
+			this.restartBtn,
+		];
+		gameOverTimeline
+			.staggerFromTo(elemArray, 0.5, { y: -1500 }, { y: 0, ease: Back.easeOut.config(1.7) }, 0.05);
+	}); // handleGameOver()
 
 	getTopTen = () => {
 		return this.setState({ loadingMsg: 'Getting Top 10. Please wait...'}, () => {
+			TweenMax.fromTo('.loading-msg', 1, { opacity: 0 }, { opacity: 1 }).repeat(-1).repeatDelay(1);
 			return axios
 				.get(`${ this.backendUrl }/top10`)
 				.then(data => this.setState({ top10: data.data, loadingMsg: '' }))
@@ -347,6 +378,7 @@ export default class Board extends Component {
 			gameOverDisplay,
 			top10,
 			loadingMsg,
+			showTop10Btn,
 		} = this.state;
 		return(
 			<StyledBoard>
@@ -380,21 +412,33 @@ export default class Board extends Component {
 					gameOverDisplay === 'flex' &&
 					<div ref = { e => this.gameOverModal = e } tabIndex = '-1' className = 'modal' style = {{ display: `${ gameOverDisplay }` }}>
 						<div className = 'box'>
-							<h3>Game Over!</h3>
+							<h3>
+								<span id = 'game-over-letters1'>G</span>
+								<span id = 'game-over-letters2'>a</span>
+								<span id = 'game-over-letters3'>m</span>
+								<span id = 'game-over-letters4'>e&#160;</span>
+								<span id = 'game-over-letters5'>O</span>
+								<span id = 'game-over-letters6'>v</span>
+								<span id = 'game-over-letters7'>e</span>
+								<span id = 'game-over-letters8'>r</span>
+								<span id = 'game-over-letters9'>!</span>
+							</h3>
 
-							<p><span className = 'points'>{ points }</span>point{ points !== 1 && 's' }</p>
+							<p id = 'points-p'><span className = 'points'>{ points }</span>point{ points !== 1 && 's' }</p>
 
-							<button onClick = { this.handleStart }>Restart</button>
+							<button ref = { e => this.restartBtn = e } onClick = { this.handleStart }>Restart</button>
 
 							<HighScore
 								backendUrl = { this.backendUrl }
 								points = { points }
 								getTopTen = { this.getTopTen }
+								focusRestartBtn = { this.focusRestartBtn }
+								showTop10 = { this.showTop10 }
 							/>
 
-							{ top10.length === 0 && <button onClick = { this.getTopTen }>View Top 10</button> }
+							{ top10.length === 0 && showTop10Btn && <button id = 'view-top10-btn' onClick = { this.getTopTen }>View Top 10</button> }
 
-							{ loadingMsg && <p>{ loadingMsg }</p> }
+							{ loadingMsg && <p className = 'loading-msg'>{ loadingMsg }</p> }
 
 							{ top10.length > 0 && <Top10 top10 = { top10 } exitTop10 = { this.exitTop10 } /> }
 						</div>

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
+import { TweenLite } from 'gsap';
 
 const StyledHighScore = styled.div`
 	.wrapper {
@@ -74,9 +75,14 @@ export default class HighScore extends Component {
 			.get(`${ this.props.backendUrl }/top10/bottom`)
 			.then(data => {
 				if (points > data.data.score) {
-					return this.setState({ highScore: true, message: '' }, () => this.nameInput.focus());
+					return this.setState({ highScore: true, message: '' }, () => {
+						this.props.showTop10();
+						this.nameInput.focus();
+						return TweenLite.fromTo('.wrapper', 1, { opacity: 0 }, { opacity: 1 }).delay(1.2);
+					});
 				}
-				return this.setState({ message: 'You didn\'t make it into the Top 10 =(' });
+				this.props.showTop10();
+				return this.props.focusRestartBtn();
 			})
 			.catch(e => console.log(e));
 	}; // checkHighScore()
@@ -101,7 +107,7 @@ export default class HighScore extends Component {
 		return this.setState({
 			message: 'Name must be less than 32 characters.'
 		});
-	}
+	}; // handleInputChange()
 
 	handleSubmit = e => {
 		e.preventDefault();
@@ -122,7 +128,7 @@ export default class HighScore extends Component {
 		// else, post the new high score.
 		const newHighScore = { name, score: this.props.points };
 		this.postNewHighScore(newHighScore);
-	} // handleSubmit()
+	}; // handleSubmit()
 
 	render() {
 		const {
@@ -155,9 +161,7 @@ export default class HighScore extends Component {
 						</form>
 					</div>
 					:
-					<div className = 'wrapper'>
-						{ message && <p className = 'message'>{ message }</p> }
-					</div>
+					null
 				}
 			</StyledHighScore>
 		);
