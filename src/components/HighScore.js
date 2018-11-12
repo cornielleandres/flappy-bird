@@ -10,6 +10,10 @@ const StyledHighScore = styled.div`
 		flex-wrap: wrap;
 		flex-direction: column;
 
+		.message {
+			font-size: 1.2rem;
+		}
+
 		* {
 			margin: 8px;
 		}
@@ -24,7 +28,7 @@ const StyledHighScore = styled.div`
 			flex-wrap: wrap;
 			flex-direction: column;
 
-			.enter-your-name, .message {
+			.enter-your-name {
 				font-size: 1.2rem;
 			}
 
@@ -57,12 +61,23 @@ export default class HighScore extends Component {
 		message: '',
 	};
 
-	componentDidMount = () => this.checkHighScore(this.props.points);
+	nameInput = null;
+
+	componentDidMount = () => {
+		this.setState({ message: 'Checking high scores. Please wait...' }, () => {
+			this.checkHighScore(this.props.points);
+		});
+	};
 
 	checkHighScore = points => {
 		return axios
 			.get(`${ this.props.backendUrl }/top10/bottom`)
-			.then(data => points > data.data.score && this.setState({ highScore: true, message: '' }))
+			.then(data => {
+				if (points > data.data.score) {
+					return this.setState({ highScore: true, message: '' }, () => this.nameInput.focus());
+				}
+				return this.setState({ message: 'You didn\'t make it into the Top 10 =(' });
+			})
 			.catch(e => console.log(e));
 	}; // checkHighScore()
 
@@ -126,6 +141,7 @@ export default class HighScore extends Component {
 						<form onSubmit = { this.handleSubmit }>
 							<p className = 'enter-your-name'>Enter your name to save your record in the Top 10:</p>
 							<input 
+								ref = { e => this.nameInput = e }
 								className = 'name-input'
 								name = 'name'
 								placeholder = 'Enter your name...'
@@ -139,7 +155,9 @@ export default class HighScore extends Component {
 						</form>
 					</div>
 					:
-					null
+					<div className = 'wrapper'>
+						{ message && <p className = 'message'>{ message }</p> }
+					</div>
 				}
 			</StyledHighScore>
 		);
