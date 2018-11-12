@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import styled from 'styled-components';
 import { TweenMax } from 'gsap';
+
+// Components
+import { Top10, HighScore } from './index.js';
 
 // Images and Sounds
 import { bg, bird, ding, gameOverSound } from '../assets/index.js';
@@ -57,13 +61,13 @@ const StyledBoard = styled.div`
 	}
 
 	.modal {
-		background-color: rgba(0, 0, 0, 0.8);
+		background-color: rgba(0, 0, 0, 0.6);
 		position: fixed;
 		z-index: 1;
 		top: 0;
 		left: 0;
-		height: 100%;
 		width: 100%;
+		min-height: 100%;
 		justify-content: center;
 		align-items: center;
 
@@ -81,7 +85,8 @@ const StyledBoard = styled.div`
 		}
 
 		.box {
-			background-color: rgba(240, 234, 214, 0.4);
+			background-color: rgba(0, 0, 0, 0.8);
+			color: white;
 			display: flex;
 			justify-content: center;
 			align-items: center;
@@ -93,7 +98,7 @@ const StyledBoard = styled.div`
 			font-family: 'Indie Flower', cursive;
 
 			* {
-				margin: 10px;
+				margin: 8px;
 			}
 
 			h3 {
@@ -131,6 +136,7 @@ const initialState = {
 	gameOverDisplay: 'none',
 	topPipeLength: initialPipeLength,
 	bottomPipeLength: initialPipeLength,
+	top10: [],
 };
 
 export default class Board extends Component {
@@ -152,6 +158,8 @@ export default class Board extends Component {
 
 	scrollPipeInterval = null;
 	pipePassedPoints = 1;
+
+	backendUrl = process.env.REACT_APP_BACKEND_URL;
 
 	clearAllIntervals = () => {
 		const intervals = [
@@ -309,6 +317,15 @@ export default class Board extends Component {
 		this.gameOverSound.play();
 	});
 
+	getTopTen = () => {
+		return axios
+			.get(`${ this.backendUrl }/top10`)
+			.then(data => this.setState({ top10: data.data }))
+			.catch(e => console.log(e));
+	};
+
+	exitTop10 = () => this.setState({ top10: [] });
+
 	componentDidMount() {
 		this.startModal.focus();
 		this.dingSound = new Audio(ding);
@@ -324,7 +341,8 @@ export default class Board extends Component {
 			bottomPipeLength,
 			points,
 			startDisplay,
-			gameOverDisplay
+			gameOverDisplay,
+			top10,
 		} = this.state;
 		return(
 			<StyledBoard>
@@ -343,23 +361,39 @@ export default class Board extends Component {
 					<div ref = { e => this.bottomPipe = e } className = 'pipe bottom-pipe' style = {{ left: `calc(${ pipePosX }% - 35px)`, height: `${ bottomPipeLength }px` }}><div className = 'pipe-head'></div></div>
 				</div>
 
-				<div ref = { e => this.startModal = e } tabIndex = '-1' onKeyPress = { this.handleClickModal } className = 'modal' style = {{ display: `${ startDisplay }` }}>
-					<div className = 'box'>
-						<p className = 'instructions'>Click up arrow or w key to flap.</p>
+				{
+					startDisplay === 'flex' &&
+					<div ref = { e => this.startModal = e } tabIndex = '-1' onKeyPress = { this.handleClickModal } className = 'modal' style = {{ display: `${ startDisplay }` }}>
+						<div className = 'box'>
+							<p className = 'instructions'>Click up arrow or w key to flap.</p>
 
-						<p className = 'instructions'>Press Enter or Space to begin.</p>
+							<p className = 'instructions'>Press Enter or Space to begin.</p>
+						</div>
 					</div>
-				</div>
+				}
 
-				<div ref = { e => this.gameOverModal = e } tabIndex = '-1' onKeyPress = { this.handleClickModal } className = 'modal' style = {{ display: `${ gameOverDisplay }` }}>
-					<div className = 'box'>
-						<h3>Game Over!</h3>
+				{
+					gameOverDisplay === 'flex' &&
+					<div ref = { e => this.gameOverModal = e } tabIndex = '-1' className = 'modal' style = {{ display: `${ gameOverDisplay }` }}>
+						<div className = 'box'>
+							<h3>Game Over!</h3>
 
-						<p><span className = 'points'>{ points }</span>point{ points !== 1 && 's' }</p>
+							<p><span className = 'points'>{ points }</span>point{ points !== 1 && 's' }</p>
 
-						<p className = 'instructions'>Press Enter or Space to restart.</p>
+							<button onClick = { this.handleStart }>Restart</button>
+
+							<HighScore
+								backendUrl = { this.backendUrl }
+								points = { points }
+								getTopTen = { this.getTopTen }
+							/>
+
+							{ top10.length === 0 && <button onClick = { this.getTopTen }>View Top 10</button> }
+
+							{ top10.length > 0 && <Top10 top10 = { top10 } exitTop10 = { this.exitTop10 } /> }
+						</div>
 					</div>
-				</div>
+				}
 			</StyledBoard>
 		);
 	}
