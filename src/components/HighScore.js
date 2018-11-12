@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import { TweenLite } from 'gsap';
+import { TweenLite, TweenMax } from 'gsap';
 
 const StyledHighScore = styled.div`
 	.wrapper {
@@ -10,10 +10,6 @@ const StyledHighScore = styled.div`
 		align-items: center;
 		flex-wrap: wrap;
 		flex-direction: column;
-
-		.message {
-			font-size: 1.2rem;
-		}
 
 		* {
 			margin: 8px;
@@ -36,6 +32,10 @@ const StyledHighScore = styled.div`
 			.name-input {
 				border-radius: 5px;
 				padding: 5px 10px;
+			}
+
+			.message {
+				font-size: 1.2rem;
 			}
 
 			button {
@@ -66,23 +66,27 @@ export default class HighScore extends Component {
 
 	componentDidMount = () => {
 		this.setState({ message: 'Checking high scores. Please wait...' }, () => {
-			this.checkHighScore(this.props.points);
+			const checkScoresAnim = TweenMax.fromTo('.wrapper', 1, { opacity: 0 }, { opacity: 1 }).repeat(-1).repeatDelay(1);
+			this.checkHighScore(this.props.points, checkScoresAnim);
 		});
 	};
 
-	checkHighScore = points => {
+	checkHighScore = (points, checkScoresAnim) => {
 		return axios
 			.get(`${ this.props.backendUrl }/top10/bottom`)
 			.then(data => {
 				if (points > data.data.score) {
 					return this.setState({ highScore: true, message: '' }, () => {
+						checkScoresAnim.kill();
 						this.props.showTop10();
 						this.nameInput.focus();
 						return TweenLite.fromTo('.wrapper', 1, { opacity: 0 }, { opacity: 1 }).delay(1.2);
 					});
 				}
-				this.props.showTop10();
-				return this.props.focusRestartBtn();
+				return this.setState({ message: '' }, () => {
+					this.props.showTop10();
+					return this.props.focusRestartBtn();
+				});
 			})
 			.catch(e => console.log(e));
 	}; // checkHighScore()
@@ -161,7 +165,9 @@ export default class HighScore extends Component {
 						</form>
 					</div>
 					:
-					null
+					<div className = 'wrapper'>
+						{ message && <p className = 'message'>{ message }</p> }
+					</div>
 				}
 			</StyledHighScore>
 		);

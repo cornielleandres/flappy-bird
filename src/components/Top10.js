@@ -6,7 +6,7 @@ const StyledTable = styled.table`
 	border: 1px solid black;
 	border-collapse: collapse;
 	min-width: 70%;
-	min-height: 100%;
+	height: 500px;
 	position: absolute;
 	color: black;
 
@@ -14,6 +14,7 @@ const StyledTable = styled.table`
 		border: 1px solid black;
 		border-collapse: collapse;
 		text-align: center;
+		vertical-align: middle;
 		font-size: 1.3rem;
 		padding 5px 10px;
 	}
