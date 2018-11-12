@@ -24,7 +24,7 @@ const StyledHighScore = styled.div`
 			flex-wrap: wrap;
 			flex-direction: column;
 
-			.enter-your-name, .error-msg {
+			.enter-your-name, .message {
 				font-size: 1.2rem;
 			}
 
@@ -54,7 +54,7 @@ export default class HighScore extends Component {
 		highScore: false,
 		name: '',
 		scoreSubmitted: false,
-		errorMsg: '',
+		message: '',
 	};
 
 	componentDidMount = () => this.checkHighScore(this.props.points);
@@ -62,27 +62,29 @@ export default class HighScore extends Component {
 	checkHighScore = points => {
 		return axios
 			.get(`${ this.props.backendUrl }/top10/bottom`)
-			.then(data => points > data.data.score && this.setState({ highScore: true, errorMsg: '' }))
+			.then(data => points > data.data.score && this.setState({ highScore: true, message: '' }))
 			.catch(e => console.log(e));
 	}; // checkHighScore()
 
 	postNewHighScore = highScore => {
-		return axios
+		return this.setState({ message: 'Posting high score. Please wait...' }, () => {
+			return axios
 			.post(`${ this.props.backendUrl }/top10/`, highScore)
-			.then(data => this.setState({ scoreSubmitted: true, errorMsg: '' }, () => this.props.getTopTen()))
+			.then(data => this.setState({ scoreSubmitted: true, message: '' }, () => this.props.getTopTen()))
 			.catch(e => console.log(e));
+		});
 	}; // postNewHighScore()
 
 	handleInputChange = e => {
 		if (e.target.value.length < 32) {
 			return this.setState({
 				[e.target.name]: e.target.value,
-				errorMsg: ''
+				message: ''
 			});
 		}
 
 		return this.setState({
-			errorMsg: 'Name must be less than 32 characters.'
+			message: 'Name must be less than 32 characters.'
 		});
 	}
 
@@ -100,7 +102,7 @@ export default class HighScore extends Component {
 		}
 
 		// if emptyName is true, return an error message stating such.
-		if (emptyName) return this.setState({ errorMsg: 'Name must not be empty.' });
+		if (emptyName) return this.setState({ message: 'Name must not be empty.' });
 
 		// else, post the new high score.
 		const newHighScore = { name, score: this.props.points };
@@ -112,7 +114,7 @@ export default class HighScore extends Component {
 			highScore,
 			name,
 			scoreSubmitted,
-			errorMsg
+			message
 		} = this.state;
 		return(
 			<StyledHighScore>
@@ -131,7 +133,7 @@ export default class HighScore extends Component {
 								onChange = { this.handleInputChange }
 							/>
 
-							{ errorMsg && <p className = 'error-msg'>{ errorMsg }</p> }
+							{ message && <p className = 'message'>{ message }</p> }
 
 							<button type = 'submit'>Submit</button>
 						</form>

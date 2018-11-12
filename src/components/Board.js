@@ -137,6 +137,7 @@ const initialState = {
 	topPipeLength: initialPipeLength,
 	bottomPipeLength: initialPipeLength,
 	top10: [],
+	loadingMsg: '',
 };
 
 export default class Board extends Component {
@@ -318,10 +319,12 @@ export default class Board extends Component {
 	});
 
 	getTopTen = () => {
-		return axios
-			.get(`${ this.backendUrl }/top10`)
-			.then(data => this.setState({ top10: data.data }))
-			.catch(e => console.log(e));
+		return this.setState({ loadingMsg: 'Getting Top 10. Please wait...'}, () => {
+			return axios
+				.get(`${ this.backendUrl }/top10`)
+				.then(data => this.setState({ top10: data.data, loadingMsg: '' }))
+				.catch(e => console.log(e));
+		});
 	};
 
 	exitTop10 = () => this.setState({ top10: [] });
@@ -343,6 +346,7 @@ export default class Board extends Component {
 			startDisplay,
 			gameOverDisplay,
 			top10,
+			loadingMsg,
 		} = this.state;
 		return(
 			<StyledBoard>
@@ -389,6 +393,8 @@ export default class Board extends Component {
 							/>
 
 							{ top10.length === 0 && <button onClick = { this.getTopTen }>View Top 10</button> }
+
+							{ loadingMsg && <p>{ loadingMsg }</p> }
 
 							{ top10.length > 0 && <Top10 top10 = { top10 } exitTop10 = { this.exitTop10 } /> }
 						</div>
