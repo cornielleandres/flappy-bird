@@ -21,3 +21,6 @@ const Header = () => {
 };
 
 export default Header;
+
+// for testing
+export { StyledHeader };

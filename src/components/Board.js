@@ -448,3 +448,6 @@ export default class Board extends Component {
 		);
 	}
 };
+
+// for testing purposes
+export { StyledBoard };
