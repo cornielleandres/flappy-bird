@@ -2,27 +2,27 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 // Component
-import { Header } from '../../components/index.js';
+import { Header, StyledHeader } from '../../components/index.js';
 
 describe('<Header />', () => {
 	it('renders without crashing', () => {
 		shallow(<Header />);
 	});
 
-	it('renders a styledHeader component', () => {
+	it('renders a StyledHeader component', () => {
 		const wrapper = mount(<Header />);
-		const styledHeader = wrapper.find('header.sc-bwzfXH');
+		const styledHeaderComp = wrapper.find(StyledHeader);
 
 		expect(wrapper.children().length).toBe(1);
-		expect(styledHeader.length).toBe(1);
+		expect(styledHeaderComp.length).toBe(1);
 	});
 
-	it('renders an h1 tag inside StyledHeader', () => {
+	it('renders an h1 tag inside styledHeaderComp', () => {
 		const wrapper = mount(<Header />);
-		const styledHeader = wrapper.find('header.sc-bwzfXH');
-		const h1 = styledHeader.find('h1');
+		const styledHeaderComp = wrapper.find(StyledHeader);
+		const h1 = styledHeaderComp.find('h1');
 
-		expect(styledHeader.children().length).toBe(1);
+		expect(styledHeaderComp.children().length).toBe(1);
 		expect(h1.length).toBe(1);
 		expect(h1.text()).toBe('Flappy Bird Clone');
 	});
