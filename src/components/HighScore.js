@@ -80,7 +80,7 @@ export default class HighScore extends Component {
 						checkScoresAnim.kill();
 						this.props.showTop10();
 						this.nameInput.focus();
-						return TweenLite.fromTo('.wrapper', 1, { opacity: 0 }, { opacity: 1 }).delay(1.2);
+						return TweenLite.fromTo('.wrapper', 1, { opacity: 0 }, { opacity: 1 }).delay(1);
 					});
 				}
 				return this.setState({ message: '' }, () => {
