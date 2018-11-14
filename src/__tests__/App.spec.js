@@ -23,7 +23,7 @@ describe('App', () => {
 		const headerComp = appDiv.find(Header);
 		const boardComp = appDiv.find(Board);
 
-		expect(wrapper.prop('children').length).toBe(2);
+		expect(wrapper.children().length).toBe(2);
 		expect(headerComp.length).toBe(1);
 		expect(boardComp.length).toBe(1);
 	});
