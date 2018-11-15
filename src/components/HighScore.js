@@ -174,4 +174,5 @@ export default class HighScore extends Component {
 	}
 };
 
+// for testing
 export { StyledHighScore };
