@@ -1,5 +1,5 @@
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { mount } from 'enzyme';
 
 // Component
 import { Board, StyledBoard, HighScore, Top10 } from '../../components/index.js';
