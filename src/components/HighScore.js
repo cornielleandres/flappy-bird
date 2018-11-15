@@ -173,3 +173,5 @@ export default class HighScore extends Component {
 		);
 	}
 };
+
+export { StyledHighScore };
