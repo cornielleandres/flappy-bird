@@ -147,6 +147,41 @@ describe('<Board />', () => {
 
 				expect(top10Comp.length).toBe(1);
 			});
+
+			describe('passed props to child components', () => {
+				it('should pass 5 props to HighScore component', () => {
+					const wrapper = mount(<Board />);
+					wrapper.setState({ startDisplay: 'none', gameOverDisplay: 'flex' });
+					const styledBoard = wrapper.find(StyledBoard);
+					const modal = styledBoard.find('div.modal');
+					const box = modal.find('div.box');
+					const highScore = box.find(HighScore);
+
+					expect(Object.keys(highScore.props()).length).toBe(5);
+					expect(highScore.prop('backendUrl')).toBe('http://localhost:5000');
+					expect(typeof(highScore.prop('focusRestartBtn'))).toBe('function');
+					expect(typeof(highScore.prop('getTopTen'))).toBe('function');
+					expect(highScore.prop('points')).toBe(0);
+					expect(typeof(highScore.prop('showTop10'))).toBe('function');
+				});
+
+				it('should pass 2 props to Top10 component', () => {
+					const wrapper = mount(<Board />);
+					wrapper.setState({
+						startDisplay: 'none',
+						gameOverDisplay: 'flex',
+						top10: [ {} ],
+					});
+					const styledBoard = wrapper.find(StyledBoard);
+					const modal = styledBoard.find('div.modal');
+					const box = modal.find('div.box');
+					const top10Comp = box.find(Top10);
+	
+					expect(Object.keys(top10Comp.props()).length).toBe(2);
+					expect(top10Comp.prop('top10')).toEqual(wrapper.instance().state.top10);
+					expect(typeof(top10Comp.prop('exitTop10'))).toBe('function');
+				});
+			}); // describe 'passed props to child components'
 		}); // describe 'inside div.gameOverDisplay'
 
 		describe('inside screen div', () => {
