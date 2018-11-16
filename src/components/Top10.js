@@ -94,3 +94,6 @@ const Top10 = ({ top10, exitTop10 }) =>  {
 };
 
 export default Top10;
+
+// for tests
+export { StyledTable };
